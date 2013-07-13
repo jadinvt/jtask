@@ -1,5 +1,5 @@
 import subprocess
-from bottle import route, run
+from bottle import request, route, post, run
 TODO_PATH = 'bin/todo'
 TODO_CONFIG = 'etc/config.todo'
 TODO_BASE_COMMAND = '%s -d %s' %(TODO_PATH, TODO_CONFIG)
@@ -13,9 +13,21 @@ def list(list_name='task.txt'):
 	return html
 
 
+@post('/add')
+def task():
+	task = request.forms.get('task')
+	if task:
+		run_command([TODO_PATH, '-d', TODO_CONFIG, 'a', "%s" % task])
+	return "<b>Added function %s</b><br/>" % task
+
+
 @route('/hello/:name')
 def index(name='World'):
-    return '<b>Hello %s!</b>' % name
+
+    return '''<form method="POST" action="/add">
+                <input name="task"     type="text" />
+                <input type="submit" />
+              </form>'''
 
 
 def run_command(command):

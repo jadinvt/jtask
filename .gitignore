@@ -1,3 +1,5 @@
 .Python
         .*.swp
         *.py[co]
+todo.txt-cli/
+todo.txt
