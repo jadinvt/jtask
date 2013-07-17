@@ -1,28 +1,28 @@
-import subprocess
 from bottle import redirect, request, route, post, run
-TODO_PATH = 'bin/todo'
-TODO_CONFIG = 'etc/config.todo'
-TODO_BASE_COMMAND = '%s -d %s' %(TODO_PATH, TODO_CONFIG)
+from todo_classes import todo_list, todo_item, run_command, \
+    TODO_PATH, TODO_CONFIG
 
 @route('/list')
 def list(list_name='task.txt'):
-		
-	list = run_command([TODO_PATH, '-d', TODO_CONFIG, 'list'])
-	list = list.replace("\n","<br/>")
-	html = list
-    html = 'blah'
-    # <input name="task"     type="text" />
-    # <input type="submit" />
-    # </form>"""
-	return html
+    project = request.query.project or ''
+    context = request.query.context or ''
+    date = request.query.date or ''
+    priority = request.query.priority or ''
 
+    cur_list = todo_list(priority, date, project, context)
+    return cur_list.to_html()
+
+@route('/project/:project')
+def project(project =''):
+    cur_list = todo_list('project')
+    return cur_list.to_html()
 
 @post('/add')
 def task():
-	task = request.forms.get('task')
-	if task:
-		run_command([TODO_PATH, '-d', TODO_CONFIG, 'a', "%s" % task])
-	redirect('/list')
+    task = request.forms.get('task')
+    if task:
+        run_command([TODO_PATH, '-d', TODO_CONFIG, 'a', "%s" % task])
+    redirect('/list')
 
 @route('/')
 @route('/hello/:name')
@@ -32,10 +32,5 @@ def index(name='World'):
                 <input name="task"     type="text" />
                 <input type="submit" />
               </form>'''
-
-
-def run_command(command):
-    p = subprocess.check_output(command)
-    return p
 
 run(host='localhost', port=8080)
